@@ -7,8 +7,6 @@ const usuarios = new Usuarios();
 io.on('connection', (client) => {
 
     client.on('entrarChat', (data, callback) => {
-
-
         if(!data.nombre || !data.sala) return callback({err:true, mensage:"nombre/sala requeridos"});
         
         client.join(data.sala);
@@ -24,6 +22,8 @@ io.on('connection', (client) => {
         client.broadcast.to(persona.sala).emit('listaPersona', usuarios.getPersonasPorSala(persona.sala));
         
         callback( usuarios.getPersonasPorSala(persona.sala))
+
+        client.broadcast.emit('salasCreadas', usuarios.getSalas());
 
         
         
@@ -54,24 +54,25 @@ io.on('connection', (client) => {
 
     client.on('disconnect', () => {
         console.log('Usuario desconectado');
-         let usuario = usuarios.getPersona( client.id );
-         console.log(usuario);
-         usuarios.borrarPersona( client.id );
-         if (!usuario.sala) return;
-        
-        client.broadcast.to(usuario.sala).emit('crearMensaje', 
-            crearMensaje(
-                "Administrador", 
-                `${usuario.nombre} abandono el chat`
-            ));
+        let usuario = usuarios.getPersona( client.id );
 
-        client.broadcast.to(usuario.sala).emit('listaPersona', usuarios.getPersonasPorSala(usuario.sala) );
+        if (usuario) {
+            usuarios.borrarPersona( client.id );
+            client.broadcast.to(usuario.sala).emit('crearMensaje', 
+                crearMensaje(
+                    "Administrador", 
+                    `${usuario.nombre} abandono el chat`
+                ));
+    
+            client.broadcast.to(usuario.sala).emit('listaPersona', usuarios.getPersonasPorSala(usuario.sala) );
+            client.broadcast.emit('salasCreadas', usuarios.getSalas()); 
+        }
          
 
     });
 
 
     //sockets del index
-    client.emit('salasCreadas', usuarios.getSalas() )
+    client.emit('salasCreadas', usuarios.getSalas());
 
 });

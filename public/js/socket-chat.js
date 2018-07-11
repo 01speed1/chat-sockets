@@ -13,7 +13,6 @@ var usuario = {
 };
 
 
-
 socket.on('connect', function() {
     console.log('Conectado al servidor');
 

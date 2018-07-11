@@ -43,7 +43,14 @@ class Usuarios {
 
         let personaBorrada = this.getPersona(id);
         this.personas = this.personas.filter(persona =>  persona.id !=id)
+        this.borrarSala(personaBorrada.sala)
         return personaBorrada
+    }
+
+    borrarSala(sala){
+        if(this.getPersonasPorSala(sala).length === 0 ){
+            this.salas = this.salas.filter(s => s != sala )
+        }
     }
 
 
